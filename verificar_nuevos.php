@@ -12,27 +12,24 @@ $dbname = "formulario_db_qpn5";
 $user = "usuarioform";
 $password = "zhLh8QQfitSubKHj1DlNf3vljNn0g1dP";
 
-// Obtener el último ID conocido desde el parámetro GET
 $ultimo_id_actual = isset($_GET['ultimo']) ? intval($_GET['ultimo']) : 0;
 
 try {
-    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
+    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require", $user, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // ✅ Consulta corregida - usar tabla "pedidos"
     $stmt = $conn->query("SELECT MAX(id) as max_id FROM pedidos");
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $nuevo_id = isset($row['max_id']) ? intval($row['max_id']) : 0;
-
     $hay_nuevo = $nuevo_id > $ultimo_id_actual;
 
-    // Respuesta en formato JSON
     echo json_encode([
         'nuevo' => $hay_nuevo,
         'ultimo' => $nuevo_id
     ]);
 } catch (PDOException $e) {
+    error_log("Error PostgreSQL: " . $e->getMessage());
     echo json_encode([
         'nuevo' => false,
         'ultimo' => $ultimo_id_actual

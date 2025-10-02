@@ -26,7 +26,7 @@ if (isset($_POST['id'], $_POST['estado'])) {
     }
 
     try {
-        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
+        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require", $user, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $stmt = $conn->prepare("UPDATE pedidos SET estado = :estado WHERE id = :id");
@@ -37,6 +37,7 @@ if (isset($_POST['id'], $_POST['estado'])) {
 
         echo "ok";
     } catch (PDOException $e) {
+        error_log("Error PostgreSQL: " . $e->getMessage());
         echo "error_bd";
     }
 } else {

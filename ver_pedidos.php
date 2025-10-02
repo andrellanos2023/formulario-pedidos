@@ -12,44 +12,23 @@ $dbname = "formulario_db_qpn5";
 $user = "usuarioform";
 $password = "zhLh8QQfitSubKHj1DlNf3vljNn0g1dP";
 
-$pedidos = [];
-
 try {
-    // Intentar conexión con diferentes opciones de SSL
-    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
-    
-    // Opción 1: Intentar con SSL
-    try {
-        $conn = new PDO("$dsn;sslmode=require", $user, $password);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        // Opción 2: Intentar sin SSL
-        $conn = new PDO($dsn, $user, $password);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
+    // 🔹 Conexión PostgreSQL con SSL
+    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require", $user, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Verificar si la tabla existe
-    $stmt = $conn->query("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'pedidos')");
-    $tablaExiste = $stmt->fetchColumn();
-    
-    if (!$tablaExiste) {
-        die("Error: La tabla 'pedidos' no existe en la base de datos.");
-    }
-
-    // Consulta para obtener todos los pedidos
+    // Consulta para obtener todos los pedidos ordenados por ID descendente
     $stmt = $conn->query("SELECT * FROM pedidos ORDER BY id DESC");
     $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
 } catch (PDOException $e) {
-    // Mostrar error detallado solo en desarrollo
-    $error = "Error de conexión: " . $e->getMessage();
-    error_log($error);
-    die("Error de conexión a la base de datos. Intente más tarde.");
+    error_log("Error PostgreSQL: " . $e->getMessage());
+    die("Error de conexión, intente más tarde.");
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Listado de Pedidos</title>
@@ -57,7 +36,139 @@ try {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <audio id="notificacion-audio" src="./notificacion.mp3" preload="auto"></audio>
     <style>
-        /* (Mantener todos los estilos CSS igual) */
+        /* Animación de campana para alerta visual de nuevos pedidos */
+        @keyframes campana-parpadeo {
+
+            0%,
+            100% {
+                color: #ffc107;
+                transform: scale(1);
+            }
+
+            10% {
+                color: red;
+                transform: scale(1.4);
+            }
+
+            20% {
+                color: #ff5722;
+                transform: scale(1);
+            }
+
+            30% {
+                color: red;
+                transform: scale(1.3);
+            }
+
+            40% {
+                color: #ff5722;
+                transform: scale(1);
+            }
+
+            50% {
+                color: red;
+                transform: scale(1.3);
+            }
+
+            60% {
+                color: #ff5722;
+                transform: scale(1);
+            }
+
+            70% {
+                color: red;
+                transform: scale(1.3);
+            }
+
+            80% {
+                color: #ff5722;
+                transform: scale(1);
+            }
+
+            90% {
+                color: red;
+                transform: scale(1.3);
+            }
+        }
+
+        .bell-alert {
+            animation: campana-parpadeo 3s ease-in-out 1;
+        }
+
+        .bell-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .bell-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 50%;
+            display: none;
+        }
+    </style>
+    <script>
+        // Script que consulta periódicamente si hay nuevos pedidos y muestra alerta visual/sonora
+        document.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('notificacion-audio');
+            const campana = document.getElementById('campana-icono');
+            const contador = document.getElementById('contador-pedidos');
+            let tituloOriginal = document.title;
+            let parpadeoTitulo = null;
+
+            let ultimoID = <?= count($pedidos) ? $pedidos[0]['id'] : 0 ?>;
+            let nuevosPedidos = 0;
+
+            setInterval(() => {
+                fetch('verificar_nuevos.php?ultimo=' + ultimoID)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.nuevo) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.play();
+
+                            campana.classList.add('bell-alert');
+                            setTimeout(() => campana.classList.remove('bell-alert'), 3000);
+
+                            nuevosPedidos++;
+                            contador.textContent = nuevosPedidos;
+                            contador.style.display = 'inline';
+                            // Parpadeo del título de la pestaña      
+                            if (!parpadeoTitulo) {
+                                let visible = true;
+                                parpadeoTitulo = setInterval(() => {
+                                    document.title = visible ? '🛎️ ¡Nuevo pedido recibido!' : tituloOriginal;
+                                    visible = !visible;
+                                }, 1000);
+                            }
+                            ultimoID = data.ultimo;
+                        }
+                    });
+            }, 10000);
+
+            window.resetearContador = () => {
+                nuevosPedidos = 0;
+                contador.style.display = 'none';
+                document.title = tituloOriginal;
+
+                if (parpadeoTitulo) {
+                    clearInterval(parpadeoTitulo);
+                    parpadeoTitulo = null;
+                }
+            };
+        });
+    </script>
+    <!-- FIN CAMPANA -->
+    <style>
+        /* Estilos visuales del panel de pedidos */
         * {
             box-sizing: border-box;
         }
@@ -253,108 +364,22 @@ try {
                 min-width: 680px;
             }
         }
-
-        /* Animación de campana */
-        @keyframes campana-parpadeo {
-            0%, 100% { color: #ffc107; transform: scale(1); }
-            10% { color: red; transform: scale(1.4); }
-            20% { color: #ff5722; transform: scale(1); }
-            30% { color: red; transform: scale(1.3); }
-            40% { color: #ff5722; transform: scale(1); }
-            50% { color: red; transform: scale(1.3); }
-            60% { color: #ff5722; transform: scale(1); }
-            70% { color: red; transform: scale(1.3); }
-            80% { color: #ff5722; transform: scale(1); }
-            90% { color: red; transform: scale(1.3); }
-        }
-
-        .bell-alert {
-            animation: campana-parpadeo 3s ease-in-out 1;
-        }
-
-        .bell-container {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        .bell-count {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: red;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 50%;
-            display: none;
-        }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const audio = document.getElementById('notificacion-audio');
-            const campana = document.getElementById('campana-icono');
-            const contador = document.getElementById('contador-pedidos');
-            let tituloOriginal = document.title;
-            let parpadeoTitulo = null;
-
-            let ultimoID = <?= count($pedidos) ? $pedidos[0]['id'] : 0 ?>;
-            let nuevosPedidos = 0;
-
-            setInterval(() => {
-                fetch('verificar_nuevos.php?ultimo=' + ultimoID)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.nuevo) {
-                            audio.pause();
-                            audio.currentTime = 0;
-                            audio.play();
-
-                            campana.classList.add('bell-alert');
-                            setTimeout(() => campana.classList.remove('bell-alert'), 3000);
-
-                            nuevosPedidos++;
-                            contador.textContent = nuevosPedidos;
-                            contador.style.display = 'inline';
-                            
-                            if (!parpadeoTitulo) {
-                                let visible = true;
-                                parpadeoTitulo = setInterval(() => {
-                                    document.title = visible ? '🛎️ ¡Nuevo pedido recibido!' : tituloOriginal;
-                                    visible = !visible;
-                                }, 1000);
-                            }
-                            ultimoID = data.ultimo;
-                        }
-                    });
-            }, 10000);
-
-            window.resetearContador = () => {
-                nuevosPedidos = 0;
-                contador.style.display = 'none';
-                document.title = tituloOriginal;
-
-                if (parpadeoTitulo) {
-                    clearInterval(parpadeoTitulo);
-                    parpadeoTitulo = null;
-                }
-            };
-        });
-    </script>
 </head>
 
 <body>
 
     <h1>Listado de Pedidos
+        <!-- Campana de notificaciones -->
         <span class="bell-container" onclick="resetearContador()">
             <i id="campana-icono" class="bi bi-bell-fill" style="color:#ffc107; font-size:22px;"></i>
             <span id="contador-pedidos" class="bell-count"></span>
         </span>
     </h1>
-    
+    <!-- Botón para cerrar sesión -->
     <a href="logout.php" style="display:inline-block; padding:8px 12px; background:#d9534f; color:#fff; border-radius:4px; text-decoration:none; float:right; margin-bottom: 15px;">Cerrar Sesión</a>
 
+    <!-- Filtros de búsqueda y estado -->
     <div class="filtros-container">
         <input type="text" id="buscador" placeholder="Buscar por nombre o teléfono...">
         <select id="filtroEstado">
@@ -402,6 +427,7 @@ try {
                             <td><?= htmlspecialchars($pedido['barrio']) ?></td>
                             <td><?= htmlspecialchars($pedido['ciudad']) ?></td>
                             <td><?= htmlspecialchars($pedido['departamento']) ?></td>
+                            <!-- Selector de estado del pedido -->
                             <td>
                                 <select class="estado-select <?= strtolower(str_replace(' ', '-', $pedido['estado'])) ?>" data-id="<?= $pedido['id'] ?>">
                                     <option value="En confirmación" <?= $pedido['estado'] === 'En confirmación' ? 'selected' : '' ?>>En confirmación</option>
@@ -410,11 +436,13 @@ try {
                                     <option value="Descartado" <?= $pedido['estado'] === 'Descartado' ? 'selected' : '' ?>>Descartado</option>
                                 </select>
                             </td>
+                            <!-- Acciones disponibles -->
                             <td>
                                 <a href="editar_pedido.php?id=<?= $pedido['id'] ?>" class="action-btn edit-btn">Editar</a>
                                 <button class="action-btn delete-btn" onclick="confirmarEliminacion(<?= $pedido['id'] ?>)">Eliminar</button>
 
                                 <?php if ($pedido['whatsapp']): ?>
+                                    <!-- Enlace directo a WhatsApp con datos del pedido con emojis visibles -->
                                     <a href="https://wa.me/57<?= preg_replace('/\D/', '', $pedido['whatsapp']) ?>?text=<?= urlencode("👋 Hola {$pedido['nombre']}, gracias por tu pedido. Confirmemos tus datos:\n\n✅ Producto: Color {$pedido['color']}, Talla {$pedido['talla']}\n🏙️ Ciudad: {$pedido['ciudad']}\n📍 Dirección: {$pedido['direccion']}\n📞 Teléfono: {$pedido['telefono']}\n\n¿Son correctos los datos? Por favor, confírmame y 📦 despachamos tu pedido hoy mismo.") ?>" target="_blank" class="action-btn whatsapp-btn">WhatsApp</a>
                                 <?php endif; ?>
 
@@ -430,6 +458,7 @@ try {
         <?php endif; ?>
     </div>
 
+    <!-- Scripts para manejar acciones del panel: eliminar, copiar, filtros, cambiar estado -->
     <script>
         function confirmarEliminacion(id) {
             if (confirm("¿Seguro que deseas eliminar este pedido?")) {
@@ -449,6 +478,7 @@ try {
                 }
             });
 
+            // Valor fijo del recaudo
             const recaudo = "*RECAUDO: $95.000*";
             texto += `\n${recaudo}`;
 
@@ -498,12 +528,15 @@ try {
                 if (index !== 0 && index !== 12 && index < celdas.length - 1) {
                     texto += celda.innerText.trim() + '\t';
                 }
+                // Filtro en vivo de nombre o teléfono
             });
             navigator.clipboard.writeText(texto.trim())
                 .then(() => alert('Datos copiados en formato Google Sheets ✅'))
                 .catch(() => alert('Error al copiar'));
         }
+        // Cambio de estado del pedido con actualización en la base de datos
     </script>
 
 </body>
+
 </html>
