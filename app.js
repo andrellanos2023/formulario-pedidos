@@ -105,8 +105,8 @@ const departamentosYciudades = {
     }
 
     // Redirigir a WhatsApp (mantener color y talla en el mensaje para el cliente)
-    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: KIT DETOX\n📏 Talla: ÚNICA\n📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
-    const url = `https://wa.me/573132731250?text=${encodeURIComponent(mensaje)}`;
+    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: KIT DETOX\n📏 📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
+    const url = `https://wa.me/573127495741?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 
     // 👉 Evento de conversión TikTok: pago contraentrega
@@ -116,27 +116,41 @@ const departamentosYciudades = {
 
     // Enviar a la base de datos sin recargar
     try {
-      const formData = new FormData(form);
-      
-      const response = await fetch("grabar.php", {
-        method: "POST",
-        body: formData,
-      });
+            const formData = new FormData(form);
+            
+            const response = await fetch("grabar.php", {
+                method: "POST",
+                body: formData,
+            });
 
-      const data = await response.json();
+            const data = await response.json();
 
-      if (data.success) {
-        seccionContainer.style.display = "none";
-        seccionOcultarTextoFinal.style.display = "flex";
-        form.reset();
-      } else {
-        alert("Hubo un problema al guardar el pedido: " + (data.error || 'Error desconocido'));
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Error en el envio.");
+            if (data.success) {
+                // Ocultar formulario y mostrar confirmación
+                const seccionContainer = document.getElementById("container");
+                const seccionOcultarTextoFinal = document.getElementById("textofinal");
+                
+                console.log("Container:", seccionContainer);
+                console.log("TextoFinal:", seccionOcultarTextoFinal);
+                
+                if (seccionContainer && seccionOcultarTextoFinal) {
+                    seccionContainer.style.display = "none";
+                    seccionOcultarTextoFinal.style.display = "flex";
+                    console.log("✅ Confirmación mostrada");
+                } else {
+                    console.log("❌ No se encontraron los elementos");
+                    alert("✅ Pedido enviado correctamente");
+                }
+                
+                form.reset();
+            } else {
+                alert("Hubo un problema al guardar el pedido: " + (data.error || 'Error desconocido'));
+            }
+        } catch (error) {
+            console.error("Error completo:", error);
+            alert("Error en el envío. Por favor intenta nuevamente.");
+        }
     }
-  }
 
   // Función para recargar la página al hacer click en Aceptar
   function hideConfirmation() {
