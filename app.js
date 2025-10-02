@@ -88,7 +88,7 @@ const departamentosYciudades = {
 
     const form = event.target;
 
-    // Obtener los datos
+    // Obtener los datos (SOLO los campos que existen en la tabla)
     const nombre = form.querySelector('[name="nombre"]').value.trim();
     const cedula = form.querySelector('[name="cedula"]').value.trim();
     const telefono = form.querySelector('[name="telefono"]').value.trim();
@@ -97,19 +97,15 @@ const departamentosYciudades = {
     const barrio = form.querySelector('[name="barrio"]').value.trim();
     const ciudad = form.querySelector('[name="ciudad"]').value.trim();
     const departamento = form.querySelector('[name="departamento"]').value.trim();
-    
-    // Valores fijos para color y talla (unitalla)
-    const talla = "ÚNICA";
-    const color = "KIT DETOX";
 
-    // Validaciones (SOLO campos que el usuario debe llenar)
+    // Validaciones
     if (!nombre || !cedula || !telefono || !whatsapp || !direccion || !barrio || !ciudad || !departamento) {
       alert("Por favor completa todos los campos.");
       return;
     }
 
-    // Redirigir a WhatsApp
-    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: ${color}\n📏 Talla: ${talla}\n📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
+    // Redirigir a WhatsApp (mantener color y talla en el mensaje para el cliente)
+    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: KIT DETOX\n📏 Talla: ÚNICA\n📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
     const url = `https://wa.me/573132731250?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 
@@ -121,10 +117,6 @@ const departamentosYciudades = {
     // Enviar a la base de datos sin recargar
     try {
       const formData = new FormData(form);
-      
-      // Asegurar que se envíen los valores fijos
-      formData.set('color', color);
-      formData.set('talla', talla);
       
       const response = await fetch("grabar.php", {
         method: "POST",

@@ -393,13 +393,11 @@ try {
 
     <div class="table-container">
         <?php if (isset($pedidos) && count($pedidos) > 0): ?>
-            <table>
+           <table>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Fecha</th>
-                        <th>Color</th>
-                        <th>Talla</th>
                         <th>Nombre</th>
                         <th>Cédula</th>
                         <th>Teléfono</th>
@@ -417,8 +415,6 @@ try {
                         <tr>
                             <td><?= $pedido['id'] ?></td>
                             <td><?= $pedido['fecha'] ?? '' ?></td>
-                            <td><?= htmlspecialchars($pedido['color']) ?></td>
-                            <td><?= htmlspecialchars($pedido['talla']) ?></td>
                             <td><?= htmlspecialchars($pedido['nombre']) ?></td>
                             <td><?= htmlspecialchars($pedido['cedula']) ?></td>
                             <td><?= htmlspecialchars($pedido['telefono']) ?></td>
@@ -427,25 +423,21 @@ try {
                             <td><?= htmlspecialchars($pedido['barrio']) ?></td>
                             <td><?= htmlspecialchars($pedido['ciudad']) ?></td>
                             <td><?= htmlspecialchars($pedido['departamento']) ?></td>
-                            <!-- Selector de estado del pedido -->
                             <td>
-                                <select class="estado-select <?= strtolower(str_replace(' ', '-', $pedido['estado'])) ?>" data-id="<?= $pedido['id'] ?>">
-                                    <option value="En confirmación" <?= $pedido['estado'] === 'En confirmación' ? 'selected' : '' ?>>En confirmación</option>
-                                    <option value="Pendiente por enviar" <?= $pedido['estado'] === 'Pendiente por enviar' ? 'selected' : '' ?>>Pendiente por enviar</option>
-                                    <option value="Enviado" <?= $pedido['estado'] === 'Enviado' ? 'selected' : '' ?>>Enviado</option>
-                                    <option value="Descartado" <?= $pedido['estado'] === 'Descartado' ? 'selected' : '' ?>>Descartado</option>
+                                <select class="estado-select <?= strtolower(str_replace(' ', '-', $pedido['estado'] ?? 'En confirmación')) ?>" data-id="<?= $pedido['id'] ?>">
+                                    <option value="En confirmación" <?= ($pedido['estado'] ?? 'En confirmación') === 'En confirmación' ? 'selected' : '' ?>>En confirmación</option>
+                                    <option value="Pendiente por enviar" <?= ($pedido['estado'] ?? 'En confirmación') === 'Pendiente por enviar' ? 'selected' : '' ?>>Pendiente por enviar</option>
+                                    <option value="Enviado" <?= ($pedido['estado'] ?? 'En confirmación') === 'Enviado' ? 'selected' : '' ?>>Enviado</option>
+                                    <option value="Descartado" <?= ($pedido['estado'] ?? 'En confirmación') === 'Descartado' ? 'selected' : '' ?>>Descartado</option>
                                 </select>
                             </td>
-                            <!-- Acciones disponibles -->
                             <td>
+                                <!-- Mantener las mismas acciones -->
                                 <a href="editar_pedido.php?id=<?= $pedido['id'] ?>" class="action-btn edit-btn">Editar</a>
                                 <button class="action-btn delete-btn" onclick="confirmarEliminacion(<?= $pedido['id'] ?>)">Eliminar</button>
-
                                 <?php if ($pedido['whatsapp']): ?>
-                                    <!-- Enlace directo a WhatsApp con datos del pedido con emojis visibles -->
-                                    <a href="https://wa.me/57<?= preg_replace('/\D/', '', $pedido['whatsapp']) ?>?text=<?= urlencode("👋 Hola {$pedido['nombre']}, gracias por tu pedido. Confirmemos tus datos:\n\n✅ Producto: Color {$pedido['color']}, Talla {$pedido['talla']}\n🏙️ Ciudad: {$pedido['ciudad']}\n📍 Dirección: {$pedido['direccion']}\n📞 Teléfono: {$pedido['telefono']}\n\n¿Son correctos los datos? Por favor, confírmame y 📦 despachamos tu pedido hoy mismo.") ?>" target="_blank" class="action-btn whatsapp-btn">WhatsApp</a>
+                                    <a href="https://wa.me/57<?= preg_replace('/\D/', '', $pedido['whatsapp']) ?>?text=<?= urlencode("👋 Hola {$pedido['nombre']}, gracias por tu pedido. Confirmemos tus datos:\n\n✅ Producto: KIT DETOX RENOVADOR\n🏙️ Ciudad: {$pedido['ciudad']}\n📍 Dirección: {$pedido['direccion']}\n📞 Teléfono: {$pedido['telefono']}\n\n¿Son correctos los datos? Por favor, confírmame y 📦 despachamos tu pedido hoy mismo.") ?>" target="_blank" class="action-btn whatsapp-btn">WhatsApp</a>
                                 <?php endif; ?>
-
                                 <button class="action-btn copy-btn" onclick="copiarFila(this)">Copiar</button>
                                 <button class="action-btn copy-btn" onclick="copiarFormatoSheets(this)">Copiar Sheets</button>
                             </td>
