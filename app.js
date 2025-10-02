@@ -107,8 +107,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Redirigir a WhatsApp
-    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: KIT DETOX\n📏 Talla: ÚNICA\n📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
-    const url = `https://wa.me/573132731250?text=${encodeURIComponent(mensaje)}`;
+    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: KIT DETOX\n📏 📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
+    const url = `https://wa.me/573127495741?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 
     // Evento de conversión TikTok
