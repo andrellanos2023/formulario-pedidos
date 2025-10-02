@@ -5,23 +5,46 @@ if (!isset($_SESSION['autenticado'])) {
     exit;
 }
 
-// 🔹 Configuración PostgreSQL (igual que grabar.php)
+// 🔹 Configuración PostgreSQL
 $host = "dpg-d3e795jipnbc73bi9fng-a.oregon-postgres.render.com";
 $port = "5432";
 $dbname = "formulario_db_qpn5";
 $user = "usuarioform";
 $password = "zhLh8QQfitSubKHj1DlNf3vljNn0g1dP";
 
-try {
-    // 🔹 Conexión PostgreSQL
-    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pedidos = [];
 
-    // Consulta para obtener todos los pedidos ordenados por ID descendente
+try {
+    // Intentar conexión con diferentes opciones de SSL
+    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+    
+    // Opción 1: Intentar con SSL
+    try {
+        $conn = new PDO("$dsn;sslmode=require", $user, $password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        // Opción 2: Intentar sin SSL
+        $conn = new PDO($dsn, $user, $password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+
+    // Verificar si la tabla existe
+    $stmt = $conn->query("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'pedidos')");
+    $tablaExiste = $stmt->fetchColumn();
+    
+    if (!$tablaExiste) {
+        die("Error: La tabla 'pedidos' no existe en la base de datos.");
+    }
+
+    // Consulta para obtener todos los pedidos
     $stmt = $conn->query("SELECT * FROM pedidos ORDER BY id DESC");
     $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
 } catch (PDOException $e) {
-    die("Error de conexión, intente más tarde.");
+    // Mostrar error detallado solo en desarrollo
+    $error = "Error de conexión: " . $e->getMessage();
+    error_log($error);
+    die("Error de conexión a la base de datos. Intente más tarde.");
 }
 ?>
 
