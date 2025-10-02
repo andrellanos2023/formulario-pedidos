@@ -48,17 +48,12 @@ if (isset($_SESSION['usuario'])) {
       <div class="card shadow p-4 border-0 bg-light">
         <form onsubmit="enviarPedido(event)" action="./grabar.php" method="POST">
 
-          <div class="label"></div>
-          <div class="options">
-            
-          </div>
-          <input type="hidden" name="color" id="color">
+          <!-- Campos fijos para color y talla (no obligatorios seleccionar foto) -->
+          <input type="hidden" name="color" id="color" value="KIT DETOX">
+          <input type="hidden" name="talla" id="talla" value="ÚNICA">
 
           <div class="price">Limpia tu colon, elimina toxinas, mejora el tránsito intestinal, potencializa la pérdida de peso y combate el estreñimiento.
           <div class="price"> ⭐⭐⭐⭐⭐</div>
-          <div class="options">
-            
-          <input type="hidden" name="talla" id="talla">
 
           <div class="input-group mb-3">
             <span class="input-group-text"><i class="bi bi-person-fill"></i></span>

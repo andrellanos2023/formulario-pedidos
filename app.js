@@ -78,19 +78,7 @@ const departamentosYciudades = {
   // Llamar a cargarDepartamentos al cargar la página
   cargarDepartamentos();
 
-  function selectOption(button, field) {
-    const buttons = button.parentElement.querySelectorAll("button");
-
-    buttons.forEach((btn) => btn.classList.remove("selected"));
-    button.classList.add("selected");
-
-    document.getElementById(field).value = button.dataset.value;
-
-    if (button.dataset.img) {
-      changeMainImage(button.dataset.img);
-    }
-  }
-
+  // Función para cambiar imagen principal (opcional, no obligatorio)
   function changeMainImage(src) {
     document.getElementById("mainImage").src = src;
   }
@@ -109,28 +97,35 @@ const departamentosYciudades = {
     const barrio = form.querySelector('[name="barrio"]').value.trim();
     const ciudad = form.querySelector('[name="ciudad"]').value.trim();
     const departamento = form.querySelector('[name="departamento"]').value.trim();
-    const talla = document.getElementById("talla").value.trim();
-    const color = document.getElementById("color").value.trim();
+    
+    // Valores fijos para color y talla (unitalla)
+    const talla = "ÚNICA";
+    const color = "KIT DETOX";
 
-    // Validaciones
-    if (!nombre || !cedula || !telefono || !whatsapp || !direccion || !barrio || !ciudad || !departamento || !talla || !color) {
+    // Validaciones (sin validar color y talla ya que son fijos)
+    if (!nombre || !cedula || !telefono || !whatsapp || !direccion || !barrio || !ciudad || !departamento) {
       alert("Por favor completa todos los campos.");
       return;
     }
 
     // Redirigir a WhatsApp
-    const mensaje = `Hola, este es mi pedido:\n👟 *KIT FUXION*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Color: ${color}\n📏 Talla: ${talla}\n📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
+    const mensaje = `Hola, este es mi pedido:\n🧴 *KIT DETOX RENOVADOR*\n🧑 Nombre: ${nombre}\n🆔 Cédula: ${cedula}\n📞 Teléfono: ${telefono}\n📱 WhatsApp: ${whatsapp}\n🎨 Producto: ${color}\n📏 Talla: ${talla}\n📍 Dirección: ${direccion}\n🏘️ Barrio: ${barrio}\n🏙️ Ciudad: ${ciudad}\n🌎 Departamento: ${departamento}`;
     const url = `https://wa.me/573132731250?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 
     // 👉 Evento de conversión TikTok: pago contraentrega
     if (typeof ttq !== "undefined") {
-    ttq.track("CompletePayment");
+      ttq.track("CompletePayment");
     }
 
     // Enviar a la base de datos sin recargar
     try {
       const formData = new FormData(form);
+      
+      // Asegurar que se envíen los valores fijos
+      formData.set('color', color);
+      formData.set('talla', talla);
+      
       const response = await fetch("grabar.php", {
         method: "POST",
         body: formData,
@@ -157,7 +152,6 @@ const departamentosYciudades = {
   }
 
   // Exponer funciones necesarias al ámbito global
-  window.selectOption = selectOption;
   window.changeMainImage = changeMainImage;
   window.enviarPedido = enviarPedido;
   window.cargarCiudades = cargarCiudades;
