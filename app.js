@@ -114,47 +114,68 @@ const departamentosYciudades = {
       ttq.track("CompletePayment");
     }
 
+    // Mostrar loading en el botón
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> ENVIANDO...';
+    submitBtn.disabled = true;
+
     // Enviar a la base de datos sin recargar
     try {
-            const formData = new FormData(form);
-            
-            const response = await fetch("grabar.php", {
-                method: "POST",
-                body: formData,
-            });
+      const formData = new FormData(form);
+      
+      const response = await fetch("grabar.php", {
+        method: "POST",
+        body: formData,
+      });
 
-            const data = await response.json();
+      const data = await response.json();
 
-            if (data.success) {
-                // Ocultar formulario y mostrar confirmación
-                const seccionContainer = document.getElementById("container");
-                const seccionOcultarTextoFinal = document.getElementById("textofinal");
-                
-                console.log("Container:", seccionContainer);
-                console.log("TextoFinal:", seccionOcultarTextoFinal);
-                
-                if (seccionContainer && seccionOcultarTextoFinal) {
-                    seccionContainer.style.display = "none";
-                    seccionOcultarTextoFinal.style.display = "flex";
-                    console.log("✅ Confirmación mostrada");
-                } else {
-                    console.log("❌ No se encontraron los elementos");
-                    alert("✅ Pedido enviado correctamente");
-                }
-                
-                form.reset();
-            } else {
-                alert("Hubo un problema al guardar el pedido: " + (data.error || 'Error desconocido'));
-            }
-        } catch (error) {
-            console.error("Error completo:", error);
-            alert("Error en el envío. Por favor intenta nuevamente.");
+      if (data.success) {
+        // Ocultar formulario y mostrar confirmación
+        const seccionContainer = document.getElementById("container");
+        const seccionOcultarTextoFinal = document.getElementById("textofinal");
+        
+        if (seccionContainer && seccionOcultarTextoFinal) {
+          seccionContainer.style.display = "none";
+          seccionOcultarTextoFinal.style.display = "flex";
+        } else {
+          // Si no encuentra los elementos, mostrar alerta de éxito
+          alert("✅ Pedido enviado correctamente. Te contactaremos por WhatsApp.");
         }
+        
+        form.reset();
+      } else {
+        alert("Hubo un problema al guardar el pedido: " + (data.error || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.error("Error completo:", error);
+      alert("Error en el envío. Por favor intenta nuevamente.");
+    } finally {
+      // Restaurar el botón
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
     }
+  }
 
   // Función para recargar la página al hacer click en Aceptar
   function hideConfirmation() {
-    window.location.reload();
+    // Ocultar mensaje de confirmación
+    const textofinal = document.getElementById("textofinal");
+    if (textofinal) {
+      textofinal.style.display = "none";
+    }
+    
+    // Mostrar formulario nuevamente
+    const container = document.getElementById("container");
+    if (container) {
+      container.style.display = "flex";
+    }
+    
+    // Recargar la página después de un breve delay
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   }
 
   // Exponer funciones necesarias al ámbito global
