@@ -224,13 +224,14 @@ form .form-control:focus {
   min-width: 20px;
 }
 
+/* Estilos para la confirmación */
 #textofinal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
   display: none;
   z-index: 1000;
   justify-content: center;
@@ -239,16 +240,17 @@ form .form-control:focus {
 
 .confirmation-content {
   background: white;
-  padding: 30px;
-  border-radius: 10px;
+  padding: 40px 30px;
+  border-radius: 15px;
   text-align: center;
   max-width: 500px;
   width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .success-icon {
-  font-size: 50px;
-  color: #00c853;
+  font-size: 60px;
+  color: #28a745;
   margin-bottom: 20px;
 }
 
@@ -256,29 +258,36 @@ form .form-control:focus {
   margin-bottom: 15px;
   color: #000;
   font-size: 24px;
+  font-weight: bold;
 }
 
 #textofinal p {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   color: #666;
   font-size: 16px;
+  line-height: 1.5;
 }
 
 #textofinal button {
-  padding: 10px 25px;
+  padding: 12px 30px;
   background: #000;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s;
   font-size: 16px;
+  font-weight: bold;
 }
 
 #textofinal button:hover {
   background: #333;
 }
 
+/* Asegurar que el container tenga display flex */
+.container {
+  display: flex !important;
+}
 /* Estilos para el botón de WhatsApp flotante */
 .ao {
   position: fixed;
